@@ -297,6 +297,13 @@ third line';
         $jsonFile->checkExtension();
     }
 
+    public function testExists(): void
+    {
+        $brutFile = new FileManipulation(
+            __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'brut.file'
+        );
+        self::assertTrue($brutFile->exists());
+    }
 
     public function testOpenFileAndThrowException(): void
     {
