@@ -61,6 +61,14 @@ class FileManipulation implements FileInterface
     }
 
     /**
+     * @return bool
+     */
+    public function exists(): bool
+    {
+        return file_exists($this->getFilename());
+    }
+
+    /**
      * @return mixed
      */
     public function openFile(): mixed

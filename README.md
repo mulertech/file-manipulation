@@ -282,3 +282,30 @@ $file->insertContentAtLineNumber('content', 2);
 ```
 
 // insert content (one or more lines) at line number 2 and move other lines after
+
+<br>
+
+###### _Date path :_
+
+```
+$dateStorage = new DateStorage('path');
+$datePath = $dateStorage->datePath();
+```
+
+// return path of path/year/month (example : path/2022/02)
+
+###### _Date filename :_
+
+```
+DateStorage::dateFilename('suffix');
+```
+
+// return filename with date (example : 20220201-suffix)
+
+###### _Date time filename :_
+
+```
+DateStorage::dateTimeFilename('suffix');
+```
+
+// return filename with date and time (example : 20220201-1200-suffix)
