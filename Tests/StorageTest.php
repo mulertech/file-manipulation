@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class StorageTest extends TestCase
 {
-    private const string LOGS_DIRECTORY = __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'Storage' . DIRECTORY_SEPARATOR . 'Logs';
+    private const string LOGS_DIRECTORY = __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'Storage';
 
     protected function setUp(): void
     {

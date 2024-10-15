@@ -9,9 +9,9 @@ use MulerTech\FileManipulation\PathManipulation;
  * @package MulerTech\FileManipulation\Storage
  * @author Sébastien Muler
  */
-class DateStorage
+readonly class DateStorage
 {
-    public function __construct(private readonly string $path)
+    public function __construct(private string $path)
     {}
 
     /**

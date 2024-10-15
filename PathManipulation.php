@@ -57,7 +57,7 @@ class PathManipulation
         }
         $parent = $recursive ? self::firstExistingParentFolder($folder) : dirname($folder);
 
-        if ($parent === null) {
+        if (!is_dir($parent)) {
             throw new RuntimeException(sprintf('The parent folder of "%s" does not exist.', $folder));
         }
 
