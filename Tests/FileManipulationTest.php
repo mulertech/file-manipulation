@@ -51,14 +51,12 @@ class FileManipulationTest extends TestCase
         ]
     ];
 
-    private const string TEST_MULTILINE = 'test brut file
-second line
-third line';
+    private const string TEST_MULTILINE = 'test brut file' . PHP_EOL . 'second line' . PHP_EOL . 'third line';
 
-    private const string TEST_MULTILINE_WITH_INSERT = 'test brut file
-second line
-inserted line
-third line';
+    private const string TEST_MULTILINE_WITH_INSERT = 'test brut file' . PHP_EOL .
+    'second line' . PHP_EOL .
+    'inserted line' . PHP_EOL .
+    'third line';
 
     private const string TEST_MULTILINE_WITH_INSERT_NEW_LINE = 'test brut file
 second line

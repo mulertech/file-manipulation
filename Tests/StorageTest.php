@@ -25,7 +25,7 @@ class StorageTest extends TestCase
 
     private function deleteDirContent(string $directory): void
     {
-        if ($toDelete = scandir($directory)) {
+        if (is_dir($directory) && $toDelete = scandir($directory)) {
             foreach ($toDelete as $dir) {
                 if ($dir !== '.' && $dir !== '..') {
                     if (is_dir($directory . DIRECTORY_SEPARATOR . $dir)) {
