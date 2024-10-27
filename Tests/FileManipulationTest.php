@@ -58,10 +58,7 @@ class FileManipulationTest extends TestCase
     'inserted line' . PHP_EOL .
     'third line';
 
-    private const string TEST_MULTILINE_WITH_INSERT_NEW_LINE = 'test brut file
-second line
-
-third line';
+    private const string TEST_MULTILINE_WITH_INSERT_NEW_LINE = 'test brut file' . PHP_EOL . 'second line' . PHP_EOL . PHP_EOL . 'third line';
 
     // Test env file
     public function testParseEnvFile(): void
