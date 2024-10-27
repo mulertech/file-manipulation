@@ -1,14 +1,10 @@
----
 fruits:
-- kiwis: 3
-  mangues: 4
-  bananes: ~
-- panier: true
+    - { kiwis: 3, mangues: 4, bananes: null }
+    - { panier: true }
 legumes:
-  patates: amandine
-  poireaux: false
+    patates: amandine
+    poireaux: false
 viandes:
-- poisson
-- poulet
-- boeuf
-...
+    - poisson
+    - poulet
+    - boeuf

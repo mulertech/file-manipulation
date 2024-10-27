@@ -24,7 +24,10 @@ class DateStorage
         $path = $this->path;
 
         //archive directory
-        if (!(PathManipulation::folderExists($path) || PathManipulation::folderCreate($path))) {
+        if (!(
+            PathManipulation::folderExists($path) ||
+            PathManipulation::folderCreate($path, 0770, true)
+        )) {
             return null;
         }
 

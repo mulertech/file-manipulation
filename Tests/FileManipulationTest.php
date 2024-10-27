@@ -250,7 +250,7 @@ third line';
 
     public function testYamlOpenNonExistingFileAndThrowException(): void
     {
-        $this->expectExceptionMessage('Unable to read the content of file "yamlTest.nope".');
+        $this->expectExceptionMessage('The file "yamlTest.nope" does not exist.');
         $yamlTestNopeFile = new Yaml('yamlTest.nope');
         $yamlTestNopeFile->openFile();
     }
@@ -258,7 +258,11 @@ third line';
     public function testYamlOpenFileWithSyntaxErrorAndThrowException(): void
     {
         $filename = __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'yamlErrorTest.yaml';
-        $this->expectExceptionMessage('The Yaml file "' . $filename . '" can\'t be decode, it contain an error.');
+        if (function_exists('yaml_parse')){
+            $this->expectExceptionMessage('The Yaml file "' . $filename . '" can\'t be decode, it contain an error.');
+        } else {
+            $this->expectExceptionMessage('Unable to parse at line 6 (near "legumes=").');
+        }
         $yamlTestErrorFile = new Yaml($filename);
         $yamlTestErrorFile->openFile();
     }
@@ -307,7 +311,7 @@ third line';
 
     public function testOpenFileAndThrowException(): void
     {
-        $this->expectExceptionMessage('Unable to read the content of file "nope.file".');
+        $this->expectExceptionMessage('The file "nope.file" does not exist.');
         $nopeFile = new FileManipulation('nope.file');
         $nopeFile->openFile();
     }

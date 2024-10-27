@@ -61,17 +61,17 @@ class PathManipulation
             throw new RuntimeException(sprintf('The parent folder of "%s" does not exist.', $folder));
         }
 
-        if (is_writable($parent)) {
-            return mkdir($folder, $mode, $recursive) || is_dir($folder);
+        if (!is_writable($parent)) {
+            throw new RuntimeException(
+                sprintf(
+                    'Unable to create the path "%s", the parent folder "%s" is write protected.',
+                    $folder,
+                    $parent
+                )
+            );
         }
 
-        throw new RuntimeException(
-            sprintf(
-                'Unable to create the path "%s", the parent folder "%s" is write protected.',
-                $folder,
-                $parent
-            )
-        );
+        return mkdir($folder, $mode, $recursive) || is_dir($folder);
     }
 
     /**

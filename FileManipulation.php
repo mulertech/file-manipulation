@@ -273,6 +273,12 @@ class FileManipulation implements FileInterface
      */
     protected function getFileContent(): string
     {
+        if (!$this->exists()) {
+            throw new RuntimeException(
+                sprintf('The file "%s" does not exist.', $this->getFilename())
+            );
+        }
+
         if (false === $content = file_get_contents($this->getFilename())) {
             throw new RuntimeException(
                 sprintf('Unable to read the content of file "%s".', $this->getFilename())
