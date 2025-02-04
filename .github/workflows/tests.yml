@@ -16,8 +16,8 @@ jobs:
       fail-fast: true
       matrix:
         php: [8.3]
-        phpunit: ['10', '11']
-        stability: [prefer-lowest, prefer-stable]
+        phpunit: ['11']
+        stability: [prefer-stable]
 
     name: PHP ${{ matrix.php }} - PHPUnit ${{ matrix.phpunit }} - ${{ matrix.stability }}
 
@@ -32,7 +32,7 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, redis, igbinary, msgpack, lzf, zstd, lz4, memcached, gmp, :php-psr
           ini-values: error_reporting=E_ALL
           tools: composer:v2
-          coverage: none
+          coverage: xdebug
 
       - name: Set PHPUnit
         uses: nick-fields/retry@v3
@@ -51,6 +51,13 @@ jobs:
       - name: Execute tests
         run: vendor/bin/phpunit --display-deprecation
 
+      - name: Generate test coverage badge
+        uses: timkrase/phpunit-coverage-badge@v1.2.1
+        with:
+          coverage_badge_path: 'badge-coverage.svg'
+          push_badge: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
   windows_tests:
     runs-on: windows-2022
 
@@ -58,8 +65,8 @@ jobs:
       fail-fast: true
       matrix:
         php: [8.3]
-        phpunit: ['10', '11']
-        stability: [prefer-lowest, prefer-stable]
+        phpunit: ['11']
+        stability: [prefer-stable]
 
     name: PHP ${{ matrix.php }} - PHPUnit ${{ matrix.phpunit }} - ${{ matrix.stability }} - Windows
 
@@ -78,7 +85,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, gd, pdo_mysql, fileinfo, ftp, redis, memcached, gmp, intl, :php-psr
           tools: composer:v2
-          coverage: none
+          coverage: xdebug
 
       - name: Set PHPUnit
         uses: nick-fields/retry@v3
