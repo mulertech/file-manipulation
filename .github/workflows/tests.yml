@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [8.3]
+        php: [8.3, 8.4]
         phpunit: ['11']
         stability: [prefer-stable]
 
@@ -64,7 +64,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [8.3]
+        php: [8.3, 8.4]
         phpunit: ['11']
         stability: [prefer-stable]
 

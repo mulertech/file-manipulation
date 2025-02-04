@@ -62,9 +62,7 @@ class Env extends FileManipulation
                 continue;
             }
 
-            if (($hash = strpos($line, '#')) !== false) {
-
-            }
+            $hash = strpos($line, '#');
 
             if (($equal = strpos($line, '=')) === false) {
                 continue;

@@ -28,6 +28,26 @@ use RuntimeException;
 
 class FileManipulationTest extends TestCase
 {
+    private const string TEST_ENV_CONTENT_FILE = '#SOME COMMENTS' . PHP_EOL .
+    'key1=value1' . PHP_EOL .
+    '#Some comments' . PHP_EOL .
+    'key2=value2' . PHP_EOL .
+    'key3=value3' . PHP_EOL .
+    'key4=value4 #Some comments' . PHP_EOL .
+    'key5=\'\'\'' . PHP_EOL .
+    'multiline' . PHP_EOL .
+    'simple quote' . PHP_EOL .
+    'value' . PHP_EOL .
+    '\'\'\'' . PHP_EOL .
+    'key6="""' . PHP_EOL .
+    'multiline' . PHP_EOL .
+    'double quote' . PHP_EOL .
+    'value' . PHP_EOL .
+    '"""' . PHP_EOL .
+    'key7="value7" #Some comments' . PHP_EOL .
+    'key8=\'value8\'Some comments' . PHP_EOL .
+    'this is a comment' . PHP_EOL .
+    'key9=';
 
     private const array TEST_ARRAY = [
         'fruits' => [
@@ -79,6 +99,7 @@ class FileManipulationTest extends TestCase
         $envFile = new Env(
             __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'test.env'
         );
+        $envFile->saveFile(self::TEST_ENV_CONTENT_FILE);
         self::assertEquals(
             [
                 'key1' => 'value1',
@@ -93,6 +114,7 @@ class FileManipulationTest extends TestCase
             ],
             $envFile->parseFile()
         );
+        unlink(__DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'test.env');
     }
 
     public function testParseEnvFileWithNoFile(): void
@@ -106,6 +128,7 @@ class FileManipulationTest extends TestCase
         $envFile = new Env(
             __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'test.env'
         );
+        $envFile->saveFile(self::TEST_ENV_CONTENT_FILE);
         $envFile->loadEnv();
         self::assertEquals('value1', getenv('key1'));
         self::assertEquals('value2', getenv('key2'));
@@ -116,6 +139,7 @@ class FileManipulationTest extends TestCase
         self::assertEquals('value7', getenv('key7'));
         self::assertEquals('value8', getenv('key8'));
         self::assertEquals('', getenv('key9'));
+        unlink(__DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'test.env');
     }
 
     // Test of FileExtension : Json
