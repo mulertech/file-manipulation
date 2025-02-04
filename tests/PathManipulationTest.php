@@ -91,6 +91,6 @@ class PathManipulationTest extends TestCase
         $dir = __DIR__ . self::DS . 'Files' . self::DS . 'FileList';
         $list[] = $dir . self::DS . 'path1' . self::DS . 'path12' . self::DS . 'path121' . self::DS . 'yamlTest2.yaml';
         $list[] = $dir . self::DS . 'yamlTest1.yaml';
-        self::assertEquals($list, PathManipulation::fileList($dir));
+        self::assertEqualsCanonicalizing($list, PathManipulation::fileList($dir));
     }
 }
