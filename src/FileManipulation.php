@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MulerTech\FileManipulation;
 
 use RuntimeException;
@@ -13,12 +15,13 @@ use SplFileObject;
 class FileManipulation implements FileInterface
 {
     /**
-     * Json constructor.
      * @param string $filename
      * @param string|array<int, string> $extension
      */
-    public function __construct(private readonly string $filename, protected string|array $extension = '')
-    {
+    public function __construct(
+        private readonly string $filename,
+        protected string|array $extension = ''
+    ) {
     }
 
     /**
@@ -72,17 +75,15 @@ class FileManipulation implements FileInterface
      */
     public function firstOccurrence(string $occurrence, bool $caseSensitive = false): ?int
     {
-        if ($caseSensitive === false) {
-            $occurrence = strtolower($occurrence);
-        }
-
         $file = new SplFileObject($this->getFilename());
 
-        foreach ($file as $line) {
-            if (is_string($line) && str_contains($caseSensitive ? $line : strtolower($line), $occurrence) !== false) {
-                $lineNumber = $file->key();
-                $file = null;
-                return $lineNumber;
+        foreach ($file as $lineNumber => $line) {
+            if (!is_string($line)) {
+                continue;
+            }
+
+            if ($this->lineContains($line, $occurrence, $caseSensitive)) {
+                return (int)$lineNumber;
             }
         }
 
@@ -96,37 +97,34 @@ class FileManipulation implements FileInterface
      */
     public function lastOccurrence(string $occurrence, bool $caseSensitive = false): ?int
     {
-        if ($caseSensitive === false) {
-            $occurrence = strtolower($occurrence);
-        }
-
         $file = new SplFileObject($this->getFilename());
+        $lastLine = null;
 
-        $lineNumber = null;
-        foreach ($file as $line) {
-            if (is_string($line) && str_contains($caseSensitive ? $line : strtolower($line), $occurrence) !== false) {
-                $lineNumber = $file->key();
+        foreach ($file as $lineNumber => $line) {
+            if (!is_string($line)) {
+                continue;
+            }
+
+            if ($this->lineContains($line, $occurrence, $caseSensitive)) {
+                $lastLine = (int)$lineNumber;
             }
         }
 
-        $file = null;
-
-        return $lineNumber;
+        return $lastLine;
     }
 
     /**
-     * Get the line number $line of this file
+     * Get specific line content from the file.
      * @param int $lineNumber
-     * @return string|null
+     * @return string|array<int, mixed>|null
      */
-    public function getLine(int $lineNumber): ?string
+    public function getLine(int $lineNumber): string|array|null
     {
         $file = new SplFileObject($this->getFilename());
 
-        foreach ($file as $line) {
-            if (is_string($line) && $file->key() === $lineNumber) {
-                $file = null;
-                return trim($line);
+        foreach ($file as $key => $line) {
+            if ($line && $key === $lineNumber) {
+                return is_string($line) ? trim($line) : $line;
             }
         }
 
@@ -170,11 +168,9 @@ class FileManipulation implements FileInterface
         $file = new SplFileObject($this->getFilename());
 
         $file->seek(PHP_INT_MAX);
-        $lineNumber = $file->key();
+        $lastLine = $file->key();
 
-        $file = null;
-
-        return $lineNumber + 1;
+        return $lastLine + 1;
     }
 
     /**
@@ -224,30 +220,23 @@ class FileManipulation implements FileInterface
     }
 
     /**
-     * @param string $contain
-     * @param bool $caseSensitive
+     * Find and return the first line that contains a given string.
+     *
+     * @param string $contain The text to search.
+     * @param bool $caseSensitive Whether the search is case-sensitive.
      * @return string|null
      */
     public function findLineContains(string $contain, bool $caseSensitive = false): ?string
     {
-        if ($caseSensitive === false) {
-            $contain = strtolower($contain);
-        }
-
         if (!$this->exists()) {
             $this->fileDoesNotExists();
         }
 
-        $handle = fopen($this->getFilename(), 'rb');
+        $file = new SplFileObject($this->getFilename());
 
-        while ($handle && !feof($handle)) {
-            $buffer = fgets($handle, 4096);
-
-            if (is_string($buffer) &&
-                str_contains($caseSensitive ? $buffer : strtolower($buffer), $contain) !== false
-            ) {
-                fclose($handle);
-                return trim($buffer);
+        foreach ($file as $line) {
+            if (is_string($line) && $this->lineContains($line, $contain, $caseSensitive)) {
+                return trim($line);
             }
         }
 
@@ -320,18 +309,29 @@ class FileManipulation implements FileInterface
             $this->fileDoesNotExists();
         }
 
-        $handle = fopen($this->getFilename(), 'rb');
+        $file = new SplFileObject($this->getFilename());
 
-        while ($handle && !feof($handle)) {
-            $buffer = fgets($handle, 4096);
-
-            if ($buffer && str_starts_with($buffer, $start)) {
-                fclose($handle);
-                return trim($buffer);
+        while (!$file->eof()) {
+            $line = $file->fgets();
+            if (str_starts_with($line, $start)) {
+                return trim($line);
             }
         }
 
         return null;
+    }
+
+    /**
+     * @param string $line
+     * @param string $contain
+     * @param bool $caseSensitive
+     * @return bool
+     */
+    private function lineContains(string $line, string $contain, bool $caseSensitive = false): bool
+    {
+        $haystack = $caseSensitive ? $line : strtolower($line);
+        $needle = $caseSensitive ? $contain : strtolower($contain);
+        return str_contains($haystack, $needle);
     }
 
     /**
@@ -350,14 +350,15 @@ class FileManipulation implements FileInterface
      */
     private function prepareFileContent(string $content): array
     {
+        // If the content is just a line break, return an empty string as a line.
         if ($content === PHP_EOL) {
             return [''];
         }
-
+        // If the content does not contain any line breaks, return it as a single line.
         if (!str_contains($content, PHP_EOL)) {
             return [$content];
         }
-
+        // Otherwise, split by PHP_EOL.
         return explode(PHP_EOL, $content);
     }
 }

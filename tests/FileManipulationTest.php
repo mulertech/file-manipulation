@@ -48,7 +48,8 @@ class FileManipulationTest extends TestCase
     'key8=\'value8\'Some comments' . PHP_EOL .
     'this is a comment' . PHP_EOL .
     'this # is a comment with = in it' . PHP_EOL .
-    'key9=';
+    'key9=' . PHP_EOL .
+    'key10=\'value10';
 
     private const array TEST_ARRAY = [
         'fruits' => [
@@ -111,7 +112,8 @@ class FileManipulationTest extends TestCase
                 'key6' => self::VALUE6,
                 'key7' => 'value7',
                 'key8' => 'value8',
-                'key9' => ''
+                'key9' => '',
+                'key10' => '\'value10'
             ],
             $envFile->parseFile()
         );
@@ -140,6 +142,7 @@ class FileManipulationTest extends TestCase
         self::assertEquals('value7', getenv('key7'));
         self::assertEquals('value8', getenv('key8'));
         self::assertEquals('', getenv('key9'));
+        self::assertEquals('\'value10', getenv('key10'));
         unlink(__DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'test.env');
     }
 
