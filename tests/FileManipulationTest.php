@@ -47,6 +47,7 @@ class FileManipulationTest extends TestCase
     'key7="value7" #Some comments' . PHP_EOL .
     'key8=\'value8\'Some comments' . PHP_EOL .
     'this is a comment' . PHP_EOL .
+    'this # is a comment with = in it' . PHP_EOL .
     'key9=';
 
     private const array TEST_ARRAY = [
