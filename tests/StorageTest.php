@@ -4,6 +4,7 @@ namespace MulerTech\FileManipulation\Tests;
 
 use MulerTech\FileManipulation\Storage\DateStorage;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class StorageTest extends TestCase
 {
@@ -43,6 +44,19 @@ class StorageTest extends TestCase
 
     // Test DateStorage
     public function testDatePath(): void
+    {
+        if (!is_dir(self::LOGS_DIRECTORY)) {
+            mkdir(self::LOGS_DIRECTORY, 0777, true);
+        }
+
+        $dateStorage = new DateStorage(self::LOGS_DIRECTORY);
+        self::assertEquals(
+            self::LOGS_DIRECTORY . DIRECTORY_SEPARATOR . date("Y") . DIRECTORY_SEPARATOR . date("m"),
+            $dateStorage->datePath()
+        );
+    }
+
+    public function testDatePathWithoutExistingLogDirectory(): void
     {
         $dateStorage = new DateStorage(self::LOGS_DIRECTORY);
         self::assertEquals(

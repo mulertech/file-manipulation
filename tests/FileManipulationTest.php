@@ -200,25 +200,16 @@ class FileManipulationTest extends TestCase
 
     public function testPhpFileClassNameWithoutNamespace(): void
     {
-        $filename = __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FileWithoutNamespace.php';
+        $filename = __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'ClassWithoutNamespace.php';
         $fakeClassFile = new Php($filename);
-        $this->expectExceptionMessage('Class FileManipulation, function fileClassName. The file "' . $filename . '" does not contain namespace.');
-        $fakeClassFile->fileClassName();
+        self::assertEquals('ClassWithoutNamespace', $fakeClassFile->fileClassName());
     }
 
     public function testPhpFileClassNameWithoutClass(): void
     {
         $filename = __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FileWithoutClass.php';
         $fakeClassFile = new Php($filename);
-        $this->expectExceptionMessage('Class FileManipulation, function fileClassName. The file "' . $filename . '" does not contain class name.');
-        $fakeClassFile->fileClassName();
-    }
-
-    public function testPhpFileClassNameWithClassDoesntExist(): void
-    {
-        $filename = __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'ClassDoesntExist.php';
-        $fakeClassFile = new Php($filename);
-        $this->expectExceptionMessage('Class FileManipulation, function fileClassName. The class "MulerTech\FileManipulation\Tests\Files\BadNamespace\ClassDoesntExist" does not exist.');
+        $this->expectExceptionMessage('File "' . $filename . '" does not contain a class declaration.');
         $fakeClassFile->fileClassName();
     }
 

@@ -3,7 +3,6 @@
 namespace MulerTech\FileManipulation\FileType;
 
 use MulerTech\FileManipulation\FileManipulation;
-use RuntimeException;
 use Symfony\Component\Yaml\Yaml as SymfonyYaml;
 
 /**

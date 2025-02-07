@@ -12,84 +12,49 @@ use ReflectionProperty;
 use RuntimeException;
 
 /**
- * Class Php
+ * Class Php - Handles PHP file manipulation and reflection operations
  * @package MulerTech\FileManipulation\FileType
  * @author Sébastien Muler
  */
 class Php extends FileManipulation
 {
     private const string EXTENSION = 'php';
+    private const string NAMESPACE_PREFIX = 'namespace ';
+    private const string CLASS_PREFIX = 'class ';
 
-    /**
-     * @param string $filename
-     */
     public function __construct(string $filename)
     {
         parent::__construct($filename, self::EXTENSION);
     }
 
     /**
-     * Return the complete class name of this file.
+     * Returns the fully qualified class name from the PHP file
+     * @throws RuntimeException When namespace or class name cannot be found
      * @return class-string
      */
     public function fileClassName(): string
     {
-        $namespaceLine = $this->findLineStartsWith('namespace ');
+        $namespace = $this->extractNamespace();
+        $className = $this->extractClassName();
 
-        if (is_null($namespaceLine)) {
-            throw new RuntimeException(
-                sprintf(
-                    'Class FileManipulation, function fileClassName. The file "%s" does not contain namespace.',
-                    $this->getFilename()
-                )
-            );
-        }
-
-        $namespace = rtrim(ltrim($namespaceLine, 'namespace '), ';');
-
-        $classNameLine = $this->findLineStartsWith('class ');
-
-        if (is_null($classNameLine)) {
-            throw new RuntimeException(
-                sprintf(
-                    'Class FileManipulation, function fileClassName. The file "%s" does not contain class name.',
-                    $this->getFilename()
-                )
-            );
-        }
-
-        $className = ltrim($classNameLine, 'class ');
-        if (str_contains($className, ' ')) {
-            $className = explode(' ', $className)[0];
-        }
-
-        $fqcn = $namespace . '\\' . $className;
-        if (!class_exists($fqcn)) {
-            throw new RuntimeException(
-                sprintf(
-                    'Class FileManipulation, function fileClassName. The class "%s" does not exist.',
-                    $fqcn
-                )
-            );
-        }
+        /** @var class-string $fqcn */
+        $fqcn = $namespace === null ? $className : $namespace . '\\' . $className;
 
         return $fqcn;
     }
 
     /**
-     * @param string $path
-     * @param bool $recursive
+     * Gets class names from PHP files in a directory
+     * @param string $path Directory path to scan
+     * @param bool $recursive Whether to scan subdirectories
      * @return array<int, class-string>
      */
     public static function getClassNames(string $path, bool $recursive = false): array
     {
-        $fileList = PathManipulation::fileList($path, $recursive);
-
-        $classNames = [];
-        foreach ($fileList as $filename) {
-            $php = new Php($filename);
-            $classNames[] = $php->fileClassName();
-        }
+        $classNames = array_map(
+            static fn (string $filename) => (new self($filename))->fileClassName(),
+            PathManipulation::fileList($path, $recursive)
+        );
 
         sort($classNames);
 
@@ -121,22 +86,20 @@ class Php extends FileManipulation
 
     /**
      * @param class-string $class
-     * @param bool $withParent
+     * @param bool $withParent Include parent class properties
      * @return array<int, ReflectionProperty>
      * @throws ReflectionException
      */
     public static function getPropertiesAttributes(string $class, bool $withParent = false): array
     {
         $reflectionClass = new ReflectionClass($class);
-        $classAndParentProperties = $reflectionClass->getProperties();
+        $properties = $reflectionClass->getProperties();
 
         if ($withParent) {
-            return $classAndParentProperties;
+            return $properties;
         }
 
-        return array_filter($classAndParentProperties, static function ($property) use ($class) {
-            return $property->class === $class;
-        });
+        return array_filter($properties, static fn ($property) => $property->class === $class);
     }
 
     /**
@@ -147,41 +110,25 @@ class Php extends FileManipulation
      */
     public static function getInstanceOfPropertiesAttributesNamed(string $class, string $attributeClassName): array
     {
-        $properties = self::getPropertiesAttributes($class);
-
-        $result = [];
-        foreach ($properties as $property) {
-            $attributes = $property->getAttributes($attributeClassName);
-
-
-            if (!isset($attributes[0])) {
-                continue;
-            }
-
-            $result[$property->getName()] = $attributes[0]->newInstance();
-        }
-
-        return $result;
+        return self::getAttributeInstances(self::getPropertiesAttributes($class), $attributeClassName);
     }
 
     /**
      * @param class-string $class
-     * @param bool $withParent
+     * @param bool $withParent Include parent class methods
      * @return array<int, ReflectionMethod>
      * @throws ReflectionException
      */
     public static function getMethodsAttributes(string $class, bool $withParent = false): array
     {
         $reflectionClass = new ReflectionClass($class);
-        $classAndParentMethods = $reflectionClass->getMethods();
+        $methods = $reflectionClass->getMethods();
 
         if ($withParent) {
-            return $classAndParentMethods;
+            return $methods;
         }
 
-        return array_filter($classAndParentMethods, static function ($method) use ($class) {
-            return $method->class === $class;
-        });
+        return array_filter($methods, static fn ($method) => $method->class === $class);
     }
 
     /**
@@ -192,18 +139,62 @@ class Php extends FileManipulation
      */
     public static function getInstanceOfMethodsAttributesNamed(string $class, string $attributeClassName): array
     {
-        $methods = self::getMethodsAttributes($class);
+        return self::getAttributeInstances(self::getMethodsAttributes($class), $attributeClassName);
+    }
 
+    /**
+     * @return string|null
+     * @throws RuntimeException
+     */
+    private function extractNamespace(): ?string
+    {
+        $namespaceLine = $this->findLineStartsWith(self::NAMESPACE_PREFIX);
+
+        if (is_null($namespaceLine)) {
+            return null;
+        }
+
+        return rtrim(substr($namespaceLine, strlen(self::NAMESPACE_PREFIX)), ';');
+    }
+
+    /**
+     * @return string
+     * @throws RuntimeException
+     */
+    private function extractClassName(): string
+    {
+        $classLine = $this->findLineStartsWith(self::CLASS_PREFIX);
+
+        if (is_null($classLine)) {
+            throw new RuntimeException(
+                sprintf('File "%s" does not contain a class declaration.', $this->getFilename())
+            );
+        }
+
+        $className = substr($classLine, strlen(self::CLASS_PREFIX));
+        if (str_contains($className, ' ')) {
+            return explode(' ', $className)[0];
+        }
+
+        return $className;
+    }
+
+    /**
+     * Helper method to get attribute instances from reflection objects
+     * @param array<int, ReflectionMethod|ReflectionProperty> $reflectionObjects
+     * @param string $attributeClassName
+     * @return array<string, object>
+     */
+    private static function getAttributeInstances(array $reflectionObjects, string $attributeClassName): array
+    {
         $result = [];
-        foreach ($methods as $method) {
-            $attributes = $method->getAttributes($attributeClassName);
 
+        foreach ($reflectionObjects as $object) {
+            $attributes = $object->getAttributes($attributeClassName);
 
-            if (!isset($attributes[0])) {
-                continue;
+            if (isset($attributes[0])) {
+                $result[$object->getName()] = $attributes[0]->newInstance();
             }
-
-            $result[$method->getName()] = $attributes[0]->newInstance();
         }
 
         return $result;

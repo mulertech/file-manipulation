@@ -78,11 +78,7 @@ class FileManipulation implements FileInterface
         $file = new SplFileObject($this->getFilename());
 
         foreach ($file as $lineNumber => $line) {
-            if (!is_string($line)) {
-                continue;
-            }
-
-            if ($this->lineContains($line, $occurrence, $caseSensitive)) {
+            if (is_string($line) && $this->lineContains($line, $occurrence, $caseSensitive)) {
                 return (int)$lineNumber;
             }
         }
@@ -101,11 +97,7 @@ class FileManipulation implements FileInterface
         $lastLine = null;
 
         foreach ($file as $lineNumber => $line) {
-            if (!is_string($line)) {
-                continue;
-            }
-
-            if ($this->lineContains($line, $occurrence, $caseSensitive)) {
+            if (is_string($line) && $this->lineContains($line, $occurrence, $caseSensitive)) {
                 $lastLine = (int)$lineNumber;
             }
         }

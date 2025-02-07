@@ -3,97 +3,99 @@
 namespace MulerTech\FileManipulation\Storage;
 
 use MulerTech\FileManipulation\PathManipulation;
+use DateTime;
+use RuntimeException;
 
 /**
  * Class DateStorage
+ *
+ * Handles date-based file storage directory structure and filename generation.
+ *
  * @package MulerTech\FileManipulation\Storage
  * @author Sébastien Muler
  */
-class DateStorage
+readonly class DateStorage
 {
-    public function __construct(private readonly string $path)
+    private DateTime $currentDate;
+
+    /**
+     * @param string $path Base storage path
+     * @param ?DateTime $date
+     */
+    public function __construct(private string $path, ?DateTime $date = null)
     {
+        $this->currentDate = $date ?? new DateTime();
     }
 
     /**
      * Create or verify all the folders for save the archive,
      * return complete path or null if error.
-     * @return string|null
+     * @return string
      */
-    public function datePath(): ?string
+    public function datePath(): string
     {
-        $path = $this->path;
+        $this->ensureDirectoryExists($this->path);
+        $this->ensureDirectoryExists($this->getYearPath());
+        $this->ensureDirectoryExists($this->getMonthPath());
 
-        //archive directory
-        if (!PathManipulation::folderExists($path)) {
-            PathManipulation::folderCreate($path, 0770, true);
-        }
-
-        if (!$this->yearExists($path)) {
-            $this->yearCreate($path);
-        }
-
-        if (!$this->monthExists($path)) {
-            $this->monthCreate($path);
-        }
-
-        //complete filename path
-        return $path . DIRECTORY_SEPARATOR . date("Y") . DIRECTORY_SEPARATOR . date("m");
+        return $this->getMonthPath();
     }
 
     /**
-     * @param string $suffix
-     * @param string $separator
+     * Generates a filename with date prefix.
+     *
+     * @param string $suffix The suffix to append to the date
+     * @param string $separator The separator between date and suffix
      * @return string
      */
     public static function dateFilename(string $suffix, string $separator = '-'): string
     {
-        return date('Ymd') . $separator . $suffix;
+        return (new DateTime())->format('Ymd') . $separator . $suffix;
     }
 
     /**
-     * @param string $suffix
-     * @param string $separator
+     * Generates a filename with date and time prefix.
+     *
+     * @param string $suffix The suffix to append to the datetime
+     * @param string $separator The separator between datetime and suffix
      * @return string
      */
     public static function dateTimeFilename(string $suffix, string $separator = '-'): string
     {
-        return date('Ymd-Hi') . $separator . $suffix;
+        return (new DateTime())->format('Ymd-Hi') . $separator . $suffix;
     }
 
     /**
-     * @param string $path
-     * @return bool
+     * Ensures the base directory exists.
+     *
+     * @throws RuntimeException If directory creation fails
      */
-    private function yearExists(string $path): bool
+    private function ensureDirectoryExists(string $path): void
     {
-        return is_dir($path . DIRECTORY_SEPARATOR . date("Y"));
+        if (PathManipulation::folderExists($path)) {
+            return;
+        }
+
+        PathManipulation::folderCreate($path, 0770, true);
     }
 
     /**
-     * @param string $path
-     * @return bool
+     * Gets the year directory path.
+     *
+     * @return string
      */
-    private function yearCreate(string $path): bool
+    private function getYearPath(): string
     {
-        return PathManipulation::folderCreate($path . DIRECTORY_SEPARATOR . date("Y"));
+        return $this->path . DIRECTORY_SEPARATOR . $this->currentDate->format('Y');
     }
 
     /**
-     * @param string $path
-     * @return bool
+     * Gets the month directory path.
+     *
+     * @return string
      */
-    private function monthExists(string $path): bool
+    private function getMonthPath(): string
     {
-        return is_dir($path . DIRECTORY_SEPARATOR . date("Y") . DIRECTORY_SEPARATOR . date("m"));
-    }
-
-    /**
-     * @param string $path
-     * @return bool
-     */
-    private function monthCreate(string $path): bool
-    {
-        return PathManipulation::folderCreate($path . DIRECTORY_SEPARATOR . date("Y") . DIRECTORY_SEPARATOR . date("m"));
+        return $this->getYearPath() . DIRECTORY_SEPARATOR . $this->currentDate->format('m');
     }
 }
