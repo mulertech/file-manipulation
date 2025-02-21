@@ -1,5 +1,9 @@
 # Release notes for file-manipulation
 
+## v1.0.2 - 2025-02-21
+
+v1.0.2
+
 ## v1.0.1 - 2024-09-29
 
 v1.0.1
