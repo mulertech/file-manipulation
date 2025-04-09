@@ -93,4 +93,9 @@ class PathManipulationTest extends TestCase
         $list[] = $dir . self::DS . 'yamlTest1.yaml';
         self::assertEqualsCanonicalizing($list, PathManipulation::fileList($dir));
     }
+
+    public function testFileListEmpty(): void
+    {
+        self::assertEquals([], PathManipulation::fileList(__DIR__ . self::DS . 'Files' . self::DS . 'Nope'));
+    }
 }

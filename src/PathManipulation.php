@@ -96,6 +96,10 @@ final class PathManipulation
      */
     public static function fileList(string $path, bool $recursive = true): array
     {
+        if (!self::folderExists($path)) {
+            return [];
+        }
+
         return $recursive ? self::recursiveIteratorFileList($path) : self::iteratorFileList($path);
     }
 
