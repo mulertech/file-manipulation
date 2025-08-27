@@ -2,8 +2,14 @@
 # FileManipulation
 
 ___
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/mulertech/file-manipulation.svg?style=flat-square)](https://packagist.org/packages/mulertech/file-manipulation)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/mulertech/file-manipulation/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/mulertech/file-manipulation/actions/workflows/tests.yml)
+[![GitHub PHPStan Action Status](https://img.shields.io/github/actions/workflow/status/mulertech/file-manipulation/phpstan.yml?branch=main&label=phpstan&style=flat-square)](https://github.com/mulertech/file-manipulation/actions/workflows/phpstan.yml)
+[![Total Downloads](https://img.shields.io/packagist/dt/mulertech/file-manipulation.svg?style=flat-square)](https://packagist.org/packages/mulertech/file-manipulation)
+[![Test Coverage](https://raw.githubusercontent.com/mulertech/file-manipulation/main/badge-coverage.svg)](https://packagist.org/packages/mulertech/file-manipulation)
+___
 
-This class manipulates files and paths
+This package manipulates files and paths
 
 ___
 
