@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1744212725">
-  <project timestamp="1744212725">
+<coverage generated="1756283145">
+  <project timestamp="1756283145" name="Clover Coverage">
     <file name="/home/runner/work/file-manipulation/file-manipulation/src/FileInterface.php">
       <metrics loc="35" ncloc="15" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
     </file>
