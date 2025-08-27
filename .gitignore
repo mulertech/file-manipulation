@@ -3,4 +3,5 @@
 /vendor
 .php-cs-fixer.cache
 composer.lock
-mt-compose.yml
+# Docker development environment
+.mtdocker/
