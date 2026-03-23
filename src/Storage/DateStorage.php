@@ -2,35 +2,31 @@
 
 namespace MulerTech\FileManipulation\Storage;
 
-use MulerTech\FileManipulation\PathManipulation;
 use DateTime;
-use RuntimeException;
+use MulerTech\FileManipulation\PathManipulation;
 
 /**
- * Class DateStorage
+ * Class DateStorage.
  *
  * Handles date-based file storage directory structure and filename generation.
  *
- * @package MulerTech\FileManipulation\Storage
  * @author Sébastien Muler
  */
 readonly class DateStorage
 {
-    private DateTime $currentDate;
+    private \DateTime $currentDate;
 
     /**
      * @param string $path Base storage path
-     * @param ?DateTime $date
      */
-    public function __construct(private string $path, ?DateTime $date = null)
+    public function __construct(private string $path, ?\DateTime $date = null)
     {
-        $this->currentDate = $date ?? new DateTime();
+        $this->currentDate = $date ?? new \DateTime();
     }
 
     /**
      * Create or verify all the folders for save the archive,
      * return complete path or null if error.
-     * @return string
      */
     public function datePath(): string
     {
@@ -44,31 +40,29 @@ readonly class DateStorage
     /**
      * Generates a filename with date prefix.
      *
-     * @param string $suffix The suffix to append to the date
+     * @param string $suffix    The suffix to append to the date
      * @param string $separator The separator between date and suffix
-     * @return string
      */
     public static function dateFilename(string $suffix, string $separator = '-'): string
     {
-        return (new DateTime())->format('Ymd') . $separator . $suffix;
+        return (new \DateTime())->format('Ymd').$separator.$suffix;
     }
 
     /**
      * Generates a filename with date and time prefix.
      *
-     * @param string $suffix The suffix to append to the datetime
+     * @param string $suffix    The suffix to append to the datetime
      * @param string $separator The separator between datetime and suffix
-     * @return string
      */
     public static function dateTimeFilename(string $suffix, string $separator = '-'): string
     {
-        return (new DateTime())->format('Ymd-Hi') . $separator . $suffix;
+        return (new \DateTime())->format('Ymd-Hi').$separator.$suffix;
     }
 
     /**
      * Ensures the base directory exists.
      *
-     * @throws RuntimeException If directory creation fails
+     * @throws \RuntimeException If directory creation fails
      */
     private function ensureDirectoryExists(string $path): void
     {
@@ -81,21 +75,17 @@ readonly class DateStorage
 
     /**
      * Gets the year directory path.
-     *
-     * @return string
      */
     private function getYearPath(): string
     {
-        return $this->path . DIRECTORY_SEPARATOR . $this->currentDate->format('Y');
+        return $this->path.DIRECTORY_SEPARATOR.$this->currentDate->format('Y');
     }
 
     /**
      * Gets the month directory path.
-     *
-     * @return string
      */
     private function getMonthPath(): string
     {
-        return $this->getYearPath() . DIRECTORY_SEPARATOR . $this->currentDate->format('m');
+        return $this->getYearPath().DIRECTORY_SEPARATOR.$this->currentDate->format('m');
     }
 }

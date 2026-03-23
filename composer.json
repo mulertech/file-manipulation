@@ -1,6 +1,8 @@
 {
   "name": "mulertech/file-manipulation",
   "description": "This package manipulates and organizes files and path",
+  "type": "library",
+  "keywords": ["php", "file", "path", "filesystem"],
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
@@ -15,9 +17,9 @@
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.6",
-    "mulertech/docker-dev": "^1",
+    "mulertech/docker-dev": "^3.2",
     "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^11",
+    "phpunit/phpunit": "^12",
     "roave/security-advisories": "dev-latest"
   },
   "autoload": {

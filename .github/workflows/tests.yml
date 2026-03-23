@@ -1,4 +1,4 @@
-name: tests
+name: Tests
 
 on:
   push:
@@ -15,15 +15,13 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [8.3, 8.4]
-        phpunit: ['11']
-        stability: [prefer-stable]
+        php: ['8.3', '8.4', '8.5']
 
-    name: PHP ${{ matrix.php }} - PHPUnit ${{ matrix.phpunit }} - ${{ matrix.stability }}
+    name: PHP ${{ matrix.php }} - Linux
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -31,44 +29,31 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, redis, igbinary, msgpack, lzf, zstd, lz4, memcached, gmp, :php-psr
           ini-values: error_reporting=E_ALL
-          tools: composer:v2
-          coverage: xdebug
-
-      - name: Set PHPUnit
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: composer require phpunit/phpunit:^${{ matrix.phpunit }} --dev --no-interaction --no-update
+          coverage: none
 
       - name: Install dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: '--prefer-stable'
+
+      - name: Execute tests
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 5
-          max_attempts: 5
-          command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
-
-      - name: Execute tests
-        run: vendor/bin/phpunit --display-deprecation
-
-      - name: Generate test coverage badge
-        uses: timkrase/phpunit-coverage-badge@v1.2.1
-        with:
-          coverage_badge_path: 'badge-coverage.svg'
-          push_badge: true
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          max_attempts: 3
+          command: vendor/bin/phpunit --no-coverage
 
   windows_tests:
     runs-on: windows-2022
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     strategy:
       fail-fast: true
       matrix:
-        php: [8.3, 8.4]
-        phpunit: ['11']
-        stability: [prefer-stable]
+        php: ['8.3', '8.4', '8.5']
 
-    name: PHP ${{ matrix.php }} - PHPUnit ${{ matrix.phpunit }} - ${{ matrix.stability }} - Windows
+    name: PHP ${{ matrix.php }} - Windows
 
     steps:
       - name: Set git to use LF
@@ -77,30 +62,78 @@ jobs:
           git config --global core.eol lf
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, gd, pdo_mysql, fileinfo, ftp, redis, memcached, gmp, intl, :php-psr
-          tools: composer:v2
-          coverage: xdebug
-
-      - name: Set PHPUnit
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 5
-          max_attempts: 5
-          command: composer require phpunit/phpunit:^${{ matrix.phpunit }} --dev --no-interaction --no-update
-          shell: bash
+          coverage: none
 
       - name: Install dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: '--prefer-stable --ignore-platform-req=ext-posix'
+
+      - name: Set PHPUnit
+        shell: bash
+        run: vendor/bin/phpunit --version
+
+      - name: Execute tests
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 5
-          max_attempts: 5
-          command: composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+          max_attempts: 3
+          command: vendor/bin/phpunit --no-coverage
 
-      - name: Execute tests
+  update_badge:
+    needs: linux_tests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    name: Update coverage badge
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          ini-values: error_reporting=E_ALL
+          coverage: xdebug
+
+      - name: Install dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: '--prefer-stable'
+
+      - name: Execute tests with coverage
         run: vendor/bin/phpunit
+
+      - name: Generate coverage badge
+        uses: timkrase/phpunit-coverage-badge@v1.2.1
+        with:
+          coverage_badge_path: 'badge-coverage.svg'
+          push_badge: false
+
+      - name: Push badge to badge branch
+        run: |
+          cp badge-coverage.svg /tmp/badge-coverage.svg
+          rm badge-coverage.svg
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin badge || true
+          if git rev-parse --verify origin/badge >/dev/null 2>&1; then
+            git checkout badge
+          else
+            git checkout --orphan badge
+            git rm -rf .
+          fi
+          cp /tmp/badge-coverage.svg badge-coverage.svg
+          git add badge-coverage.svg
+          git diff --staged --quiet || git commit -m "Update coverage badge"
+          git push origin badge

@@ -3,18 +3,14 @@
 namespace MulerTech\FileManipulation\FileType;
 
 use MulerTech\FileManipulation\FileManipulation;
-use SplFileObject;
 
 /**
- * Class Env
- * @package MulerTech\FileManipulation\FileType
+ * Class Env.
+ *
  * @author Sébastien Muler
  */
 class Env extends FileManipulation
 {
-    /**
-     * @param string $filename
-     */
     public function __construct(string $filename)
     {
         parent::__construct($filename);
@@ -28,7 +24,9 @@ class Env extends FileManipulation
      *
      * Returns an associative array like:
      *   ['key1' => 'value1', 'key2' => 'value2']
-     * @return array<string|int, mixed>|null
+     *
+     * @return array<string, string>|null
+     *
      * @todo Add support for multiline values
      */
     public function parseFile(): ?array
@@ -39,7 +37,7 @@ class Env extends FileManipulation
         }
 
         $content = [];
-        $file = new SplFileObject($filename);
+        $file = new \SplFileObject($filename);
         $multilineKey = null;
         $multilineValue = '';
 
@@ -47,7 +45,7 @@ class Env extends FileManipulation
             $line = $file->fgets();
 
             // Handle multiline value ending
-            if ($multilineKey !== null) {
+            if (null !== $multilineKey) {
                 if ($this->isMultilineEnd($line)) {
                     $content[$multilineKey] = $multilineValue;
                     $multilineKey = null;
@@ -67,7 +65,7 @@ class Env extends FileManipulation
             $line = $this->stripInlineComment($line);
 
             $equalPos = strpos($line, '=');
-            if ($equalPos === false) {
+            if (false === $equalPos) {
                 continue;
             }
 
@@ -100,37 +98,31 @@ class Env extends FileManipulation
     {
         $envParsed = $this->parseFile();
 
-        if ($envParsed !== null) {
+        if (null !== $envParsed) {
             foreach ($envParsed as $key => $value) {
-                putenv("$key=$value");
+                putenv($key.'='.(string) $value);
             }
         }
     }
 
     /**
      * Determine if the given line should be skipped.
-     *
-     * @param string $line
-     * @return bool
      */
     private function shouldSkipLine(string $line): bool
     {
-        return $line === '' || str_starts_with($line, '#');
+        return '' === $line || str_starts_with($line, '#');
     }
 
     /**
      * Remove inline comments from a line.
      * Comments that start before the '=' are not removed.
-     *
-     * @param string $line
-     * @return string
      */
     private function stripInlineComment(string $line): string
     {
         $hashPos = strpos($line, '#');
         $equalPos = strpos($line, '=');
 
-        if ($hashPos !== false && $equalPos !== false) {
+        if (false !== $hashPos && false !== $equalPos) {
             $line = trim(substr($line, 0, $hashPos));
         }
 
@@ -139,9 +131,6 @@ class Env extends FileManipulation
 
     /**
      * Check if the value indicates the start of a multiline value.
-     *
-     * @param string $value
-     * @return bool
      */
     private function isMultilineStart(string $value): bool
     {
@@ -150,9 +139,6 @@ class Env extends FileManipulation
 
     /**
      * Check if the line indicates the end of a multiline value.
-     *
-     * @param string $line
-     * @return bool
      */
     private function isMultilineEnd(string $line): bool
     {
@@ -161,29 +147,25 @@ class Env extends FileManipulation
 
     /**
      * Check if the value is encapsulated in quotes.
-     *
-     * @param string $value
-     * @return bool
      */
     private function isQuoted(string $value): bool
     {
         $firstChar = $value[0] ?? '';
-        return $firstChar === '"' || $firstChar === "'";
+
+        return '"' === $firstChar || "'" === $firstChar;
     }
 
     /**
      * Remove the surrounding quotes from a quoted string.
-     *
-     * @param string $value
-     * @return string
      */
     private function stripQuotes(string $value): string
     {
         $quote = $value[0];
         $endPos = strpos($value, $quote, 1);
-        if ($endPos !== false) {
+        if (false !== $endPos) {
             return substr($value, 1, $endPos - 1);
         }
+
         return $value;
     }
 }

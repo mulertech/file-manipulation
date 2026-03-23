@@ -4,16 +4,10 @@ namespace MulerTech\FileManipulation\FileType;
 
 use MulerTech\FileManipulation\FileManipulation;
 use MulerTech\FileManipulation\PathManipulation;
-use ReflectionAttribute;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionMethod;
-use ReflectionProperty;
-use RuntimeException;
 
 /**
- * Class Php - Handles PHP file manipulation and reflection operations
- * @package MulerTech\FileManipulation\FileType
+ * Class Php - Handles PHP file manipulation and reflection operations.
+ *
  * @author Sébastien Muler
  */
 class Php extends FileManipulation
@@ -28,9 +22,11 @@ class Php extends FileManipulation
     }
 
     /**
-     * Returns the fully qualified class name from the PHP file
-     * @throws RuntimeException When namespace or class name cannot be found
+     * Returns the fully qualified class name from the PHP file.
+     *
      * @return class-string
+     *
+     * @throws \RuntimeException When namespace or class name cannot be found
      */
     public function fileClassName(): string
     {
@@ -38,15 +34,17 @@ class Php extends FileManipulation
         $className = $this->extractClassName();
 
         /** @var class-string $fqcn */
-        $fqcn = $namespace === null ? $className : $namespace . '\\' . $className;
+        $fqcn = null === $namespace ? $className : $namespace.'\\'.$className;
 
         return $fqcn;
     }
 
     /**
-     * Gets class names from PHP files in a directory
-     * @param string $path Directory path to scan
-     * @param bool $recursive Whether to scan subdirectories
+     * Gets class names from PHP files in a directory.
+     *
+     * @param string $path      Directory path to scan
+     * @param bool   $recursive Whether to scan subdirectories
+     *
      * @return array<int, class-string>
      */
     public static function getClassNames(string $path, bool $recursive = false): array
@@ -63,21 +61,24 @@ class Php extends FileManipulation
 
     /**
      * @template T of object
-     * @param class-string $class
+     *
+     * @param class-string    $class
      * @param class-string<T> $attributeClassName
-     * @return ReflectionAttribute<T>|null
-     * @throws ReflectionException
+     *
+     * @return \ReflectionAttribute<T>|null
+     *
+     * @throws \ReflectionException
      */
-    public static function getClassAttributeNamed(string $class, string $attributeClassName): ?ReflectionAttribute
+    public static function getClassAttributeNamed(string $class, string $attributeClassName): ?\ReflectionAttribute
     {
-        return (new ReflectionClass($class))->getAttributes($attributeClassName)[0] ?? null;
+        return (new \ReflectionClass($class))->getAttributes($attributeClassName)[0] ?? null;
     }
 
     /**
      * @param class-string $class
      * @param class-string $attributeClassName
-     * @return object|null
-     * @throws ReflectionException
+     *
+     * @throws \ReflectionException
      */
     public static function getInstanceOfClassAttributeNamed(string $class, string $attributeClassName): ?object
     {
@@ -86,13 +87,15 @@ class Php extends FileManipulation
 
     /**
      * @param class-string $class
-     * @param bool $withParent Include parent class properties
-     * @return array<int, ReflectionProperty>
-     * @throws ReflectionException
+     * @param bool         $withParent Include parent class properties
+     *
+     * @return array<int, \ReflectionProperty>
+     *
+     * @throws \ReflectionException
      */
     public static function getPropertiesAttributes(string $class, bool $withParent = false): array
     {
-        $reflectionClass = new ReflectionClass($class);
+        $reflectionClass = new \ReflectionClass($class);
         $properties = $reflectionClass->getProperties();
 
         if ($withParent) {
@@ -104,9 +107,10 @@ class Php extends FileManipulation
 
     /**
      * @param class-string $class
-     * @param string $attributeClassName
+     *
      * @return array<string, object> return [propertyName => mappingObject]
-     * @throws ReflectionException
+     *
+     * @throws \ReflectionException
      */
     public static function getInstanceOfPropertiesAttributesNamed(string $class, string $attributeClassName): array
     {
@@ -115,13 +119,15 @@ class Php extends FileManipulation
 
     /**
      * @param class-string $class
-     * @param bool $withParent Include parent class methods
-     * @return array<int, ReflectionMethod>
-     * @throws ReflectionException
+     * @param bool         $withParent Include parent class methods
+     *
+     * @return array<int, \ReflectionMethod>
+     *
+     * @throws \ReflectionException
      */
     public static function getMethodsAttributes(string $class, bool $withParent = false): array
     {
-        $reflectionClass = new ReflectionClass($class);
+        $reflectionClass = new \ReflectionClass($class);
         $methods = $reflectionClass->getMethods();
 
         if ($withParent) {
@@ -133,9 +139,10 @@ class Php extends FileManipulation
 
     /**
      * @param class-string $class
-     * @param string $attributeClassName
+     *
      * @return array<string, object> return [methodName => mappingObject]
-     * @throws ReflectionException
+     *
+     * @throws \ReflectionException
      */
     public static function getInstanceOfMethodsAttributesNamed(string $class, string $attributeClassName): array
     {
@@ -143,8 +150,7 @@ class Php extends FileManipulation
     }
 
     /**
-     * @return string|null
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     private function extractNamespace(): ?string
     {
@@ -158,17 +164,14 @@ class Php extends FileManipulation
     }
 
     /**
-     * @return string
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     private function extractClassName(): string
     {
         $classLine = $this->findLineStartsWith(self::CLASS_PREFIX);
 
         if (is_null($classLine)) {
-            throw new RuntimeException(
-                sprintf('File "%s" does not contain a class declaration.', $this->getFilename())
-            );
+            throw new \RuntimeException(sprintf('File "%s" does not contain a class declaration.', $this->getFilename()));
         }
 
         $className = substr($classLine, strlen(self::CLASS_PREFIX));
@@ -180,9 +183,10 @@ class Php extends FileManipulation
     }
 
     /**
-     * Helper method to get attribute instances from reflection objects
-     * @param array<int, ReflectionMethod|ReflectionProperty> $reflectionObjects
-     * @param string $attributeClassName
+     * Helper method to get attribute instances from reflection objects.
+     *
+     * @param array<int, \ReflectionMethod|\ReflectionProperty> $reflectionObjects
+     *
      * @return array<string, object>
      */
     private static function getAttributeInstances(array $reflectionObjects, string $attributeClassName): array

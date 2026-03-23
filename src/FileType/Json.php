@@ -2,35 +2,30 @@
 
 namespace MulerTech\FileManipulation\FileType;
 
-use JsonException;
 use MulerTech\FileManipulation\FileManipulation;
 
 /**
- * Class Json
- * @package MulerTech\FileManipulation\FileType
+ * Class Json.
+ *
  * @author Sébastien Muler
  */
 class Json extends FileManipulation
 {
     private const string EXTENSION = 'json';
 
-    /**
-     * @param string $filename
-     */
     public function __construct(string $filename)
     {
         parent::__construct($filename, self::EXTENSION);
     }
 
     /**
-     * @inheritDoc
-     * @throws JsonException
+     * @throws \JsonException
      */
     public function openFile(): mixed
     {
         $fileContent = $this->getFileContent();
 
-        if ($fileContent === null) {
+        if (null === $fileContent) {
             return null;
         }
 
@@ -38,8 +33,7 @@ class Json extends FileManipulation
     }
 
     /**
-     * @inheritDoc
-     * @throws JsonException
+     * @throws \JsonException
      */
     public function saveFile(mixed $content, bool $recursive = false): bool
     {
