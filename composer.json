@@ -2,7 +2,12 @@
   "name": "mulertech/file-manipulation",
   "description": "This package manipulates and organizes files and path",
   "type": "library",
-  "keywords": ["php", "file", "path", "filesystem"],
+  "keywords": [
+    "php",
+    "file",
+    "path",
+    "filesystem"
+  ],
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
@@ -12,7 +17,7 @@
     }
   ],
   "require": {
-    "php": "^8.3",
+    "php": "^8.4",
     "symfony/yaml": "^7"
   },
   "require-dev": {
@@ -28,8 +33,11 @@
     }
   },
   "autoload-dev": {
-      "psr-4": {
+    "psr-4": {
       "MulerTech\\FileManipulation\\Tests\\": "./tests"
-      }
+    }
+  },
+  "config": {
+    "sort-packages": true
   }
 }
