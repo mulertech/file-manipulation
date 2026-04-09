@@ -486,16 +486,18 @@ class FileManipulationTest extends TestCase
 
     public function testSaveNewFileWriteProtected(): void
     {
-        $testFile = new FileManipulation(
-            __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FolderTmp' . DIRECTORY_SEPARATOR . 'testWriteProtected.file'
-        );
-        self::assertTrue($testFile->saveFile('test file', true));
+        $testFile = new FileManipulation('/sys/kernel/notes');
         $this->expectException(RuntimeException::class);
-        chmod(
-            __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FolderTmp' . DIRECTORY_SEPARATOR . 'testWriteProtected.file',
-            0500
-        );
+        $this->expectExceptionMessage('it is write protected');
         $testFile->saveFile('test write protected file');
+    }
+
+    public function testSaveFileUnableToWrite(): void
+    {
+        $testFile = new FileManipulation('/dev/full');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Unable to write the file');
+        $testFile->saveFile('test');
     }
 
     public function testSaveExistingFile(): void
@@ -613,19 +615,5 @@ class FileManipulationTest extends TestCase
 
     public function tearDown(): void
     {
-        if (is_file(
-            __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FolderTmp' . DIRECTORY_SEPARATOR . 'testWriteProtected.file'
-        )) {
-            chmod(
-                __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FolderTmp' . DIRECTORY_SEPARATOR . 'testWriteProtected.file',
-                0777
-            );
-            unlink(
-                __DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FolderTmp' . DIRECTORY_SEPARATOR . 'testWriteProtected.file'
-            );
-            if (is_dir(__DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FolderTmp')) {
-                rmdir(__DIR__ . DIRECTORY_SEPARATOR . 'Files' . DIRECTORY_SEPARATOR . 'FolderTmp');
-            }
-        }
     }
 }
