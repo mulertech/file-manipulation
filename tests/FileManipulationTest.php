@@ -20,6 +20,7 @@ use MulerTech\FileManipulation\Tests\Files\Mapping\MtColumn;
 use MulerTech\FileManipulation\Tests\Files\Mapping\MtEntity;
 use MulerTech\FileManipulation\Tests\Files\Mapping\MtRoute;
 use MulerTech\FileManipulation\Tests\Files\Repository\UserRepository;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystemFamily;
 use PHPUnit\Framework\TestCase;
 use ReflectionAttribute;
 use ReflectionException;
@@ -484,6 +485,7 @@ class FileManipulationTest extends TestCase
         }
     }
 
+    #[RequiresOperatingSystemFamily('Linux')]
     public function testSaveNewFileWriteProtected(): void
     {
         $testFile = new FileManipulation('/sys/kernel/notes');
@@ -492,6 +494,7 @@ class FileManipulationTest extends TestCase
         $testFile->saveFile('test write protected file');
     }
 
+    #[RequiresOperatingSystemFamily('Linux')]
     public function testSaveFileUnableToWrite(): void
     {
         $testFile = new FileManipulation('/dev/full');
